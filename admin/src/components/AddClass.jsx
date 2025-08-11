@@ -49,10 +49,19 @@ const AddClass = () => {
     try {
       const classesCollection = collection(db, "classes");
       const classesSnapshot = await getDocs(classesCollection);
-      const classesList = classesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const classesList = classesSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .sort((a, b) => {
+          // First sort by year (descending)
+          const yearCompare = b.year.localeCompare(a.year);
+          if (yearCompare !== 0) return yearCompare;
+          
+          // Then sort by class name (ascending)
+          return a.className.localeCompare(b.className);
+        });
       setClasses(classesList);
     } catch (error) {
       console.error("Error fetching classes:", error);

@@ -39,7 +39,7 @@ const Logo7DCreationz = ({ width = 200, height = 60, className = "" }) => {
         fontWeight="600" 
         fill="url(#gradient2)"
       >
-        creationz
+        Creationz
       </text>
       
       <circle 

@@ -188,6 +188,42 @@ const CandidatesList = () => {
     saveAs(data, "Candidate_list.xlsx");
   };
 
+  const handleClearAllVotes = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to clear all votes for all candidates? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const updatePromises = candidates.map((candidate) =>
+        updateDoc(doc(db, "candidates", candidate.id), {
+          votes: 0,
+        })
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // Update local state to reflect the changes
+      setCandidates((prevCandidates) =>
+        prevCandidates.map((candidate) => ({
+          ...candidate,
+          votes: 0,
+        }))
+      );
+      
+      alert("All votes have been cleared successfully!");
+    } catch (error) {
+      console.error("Error clearing votes:", error.message);
+      alert("Error clearing votes. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: "20px" }}>
@@ -253,6 +289,14 @@ const CandidatesList = () => {
           style={{ marginLeft: "10px" }}
         >
           Delete Selected
+        </Button>
+        <Button
+          variant="contained"
+          color="warning"
+          onClick={handleClearAllVotes}
+          style={{ marginLeft: "10px" }}
+        >
+          Clear All Votes
         </Button>
       </div>
 
