@@ -229,14 +229,15 @@ const VoteResults = () => {
 
       // Title
       pdf.setFontSize(18);
-      pdf.text(`${selectedPortfolio.name} Results`, 10, yPosition);
+      pdf.setFont("Times New Roman", "bold");
+      pdf.text(`${selectedPortfolio.name} CANDIDATES RESULTS`, 10, yPosition);
       yPosition += 10;
 
       // Table Headers
       pdf.setFontSize(12);
       pdf.text("Rank", 10, yPosition);
       pdf.text("Candidate", 30, yPosition);
-      pdf.text("Votes", 100, yPosition);
+      pdf.text("Votes", 110, yPosition);
       pdf.text("Percentage", 140, yPosition);
       yPosition += 10;
       pdf.line(10, yPosition, 200, yPosition); // Line under headers
@@ -246,7 +247,7 @@ const VoteResults = () => {
       selectedPortfolio.results.forEach((result) => {
         pdf.text(`${result.rank}`, 10, yPosition);
         pdf.text(`${result.candidate}`, 30, yPosition);
-        pdf.text(`${result.votes}`, 100, yPosition);
+        pdf.text(`${result.votes}`, 110, yPosition);
         pdf.text(`${result.percentage}%`, 140, yPosition);
         yPosition += 10;
       });

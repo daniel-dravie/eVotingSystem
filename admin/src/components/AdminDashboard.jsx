@@ -21,7 +21,8 @@ import {
   Avatar,
   TextField,
   Fade,
-  Collapse,
+  Collapse,Grid,
+  Card, CardContent
 } from "@mui/material";
 import {
   BarChart,
@@ -35,9 +36,9 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
+import Logo7DCreationz from "./Logo7DCreationz";
 const drawerWidth = 240;
 
 const AdminDashboard = () => {
@@ -85,6 +86,58 @@ const AdminDashboard = () => {
 
     fetchUserProfile();
   }, []);
+    const [stats, setStats] = useState({
+    totalVoters: 0,
+    totalCandidates: 0,
+    totalPortfolios: 0,
+    voterTurnout: 0,
+  });
+
+  useEffect(() => {
+    // Set up real-time listeners
+    const votersRef = collection(db, "voters");
+    const candidatesRef = collection(db, "candidates");
+    const portfoliosRef = collection(db, "portfolios");
+
+    // Real-time listener for voters
+    const unsubscribeVoters = onSnapshot(votersRef, (snapshot) => {
+      const voters = snapshot.docs;
+      const totalVoters = voters.length;
+      const votedCount = voters.filter(
+        (doc) => doc.data().isVoted === "yes" || doc.data().isVoted === true
+      ).length;
+      const voterTurnout = totalVoters > 0 ? ((votedCount / totalVoters) * 100).toFixed(2) : 0;
+
+      setStats(prev => ({
+        ...prev,
+        totalVoters,
+        voterTurnout,
+      }));
+    });
+
+    // Real-time listener for candidates
+    const unsubscribeCandidates = onSnapshot(candidatesRef, (snapshot) => {
+      setStats(prev => ({
+        ...prev,
+        totalCandidates: snapshot.size,
+      }));
+    });
+
+    // Real-time listener for portfolios
+    const unsubscribePortfolios = onSnapshot(portfoliosRef, (snapshot) => {
+      setStats(prev => ({
+        ...prev,
+        totalPortfolios: snapshot.size,
+      }));
+    });
+
+    // Cleanup listeners on unmount
+    return () => {
+      unsubscribeVoters();
+      unsubscribeCandidates();
+      unsubscribePortfolios();
+    };
+  }, []);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -114,17 +167,25 @@ const AdminDashboard = () => {
 
   return (
     <>
+    
+
       <div style={{ display: "flex" }}>
         <AppBar
           position="fixed"
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            backgroundColor: "#444240ff",
+          }}
         >
           <Toolbar>
+            <Logo7DCreationz />
+
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
               Admin Dashboard
             </Typography>
+
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              7D Creationz E-Voting System
+              E-Voting System Platform
             </Typography>
             <Typography variant="body1" sx={{ marginRight: 2 }}>
               {userProfile.name}
@@ -155,6 +216,7 @@ const AdminDashboard = () => {
             },
           }}
         >
+          
           <Toolbar />
           <List>
             {userRole === "Staff" ? (
@@ -191,7 +253,6 @@ const AdminDashboard = () => {
               </>
             ) : (
               <>
-                
                 {/* Add Components Dropdown */}
                 <ListItemButton onClick={() => setOpenAddMenu(!openAddMenu)}>
                   <ListItemIcon>
@@ -344,6 +405,64 @@ const AdminDashboard = () => {
             marginTop: "64px",
           }}
         >
+          <Box sx={{bgcolor: '#f5f5f5'}}>
+      
+      
+      
+      <Grid container spacing={1}>
+        <Grid item xs={8} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">
+                Total Voters
+              </Typography>
+              <Typography variant="h4" color="#b85d18ff" align="center">
+                {stats.totalVoters}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={8} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">
+                Total Candidates
+              </Typography>
+              <Typography variant="h4" color="#b85d18ff" align="center">
+                {stats.totalCandidates}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={8} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">
+                Total Portfolios
+              </Typography>
+              <Typography variant="h4" color="#b85d18ff" align="center" >
+                {stats.totalPortfolios}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={8} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary">
+                Voter Turnout
+              </Typography>
+              <Typography variant="h4" color="#b85d18ff" align="center">
+                {stats.voterTurnout}%
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
           <Fade in={true} timeout={500}>
             <div>
               <Outlet />

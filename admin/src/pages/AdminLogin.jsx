@@ -14,7 +14,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import { db } from "../firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
-
+import Logo7DCreationz from "../components/Logo7DCreationz";
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,7 +81,13 @@ const AdminLogin = () => {
   return (
     <>
    
-    <Container maxWidth="sm" style={{ marginTop: "100px" }}>
+    <Container maxWidth="sm" style={{ marginTop: "100px" }}  sx={{
+          boxShadow: 3,
+          padding: 3,
+          borderRadius: 2,
+          backgroundColor: "#dad6cfff",
+        }}>
+       <Logo7DCreationz />
       <Box
         sx={{
           boxShadow: 3,
@@ -90,6 +96,7 @@ const AdminLogin = () => {
           backgroundColor: "white",
         }}
       >
+       
         <Typography variant="h4" gutterBottom align="center">
         USER LOGIN
         </Typography>
