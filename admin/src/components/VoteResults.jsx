@@ -113,40 +113,50 @@ const VoteResults = () => {
       const portfolioResults = await Promise.all(
         Object.entries(portfolioMap).map(async ([name, candidates]) => {
           if (candidates.length === 1) {
-            // Unopposed candidate logic - use votes field directly from candidate data
+            // Get all voters
             const votersCollection = collection(db, "voters");
             const snapshot = await getDocs(votersCollection);
             const voters = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
+
+            // Count only voters who actually voted (isVoted === "yes")
+            const totalYesVoters = voters.filter(
+              (v) => v.isVoted === "yes"
+            ).length;
+
             const candidate = candidates[0];
-            const totalVotesUnopposed = candidate.votes || 0;
-            const yesVotes = totalVotesUnopposed; // Since votes field counts yes votes
-            const noVotes = 0; // No separate no votes count available here
-            const yesPercentage =
-              ((totalVotesUnopposed / voters.length) * 100).toFixed(2) || 0;
-            // Removed unused noPercentage variable
-            const resultStatus =
-              totalVotesUnopposed > voters.length ? "Won" : "Lost";
+            const candidateVotes = candidate.votes || 0;
+
+            // For unopposed candidates, percentage is based on actual voters who voted
+            const approvalPercentage = 
+              candidateVotes > 0
+                ? ((totalYesVoters / candidateVotes) * 100).toFixed(3)
+                : 0;
+
+            // For unopposed candidates, return "Approved" if totalYesVoters > candidateVotes, else "Unapproved"
+            const resultStatus = totalYesVoters > candidateVotes ? "Approved" : "Unapproved";
 
             const results = [
               {
                 ...candidate,
-                votes: totalVotesUnopposed,
-                yesVotes,
-                noVotes,
-                percentage: yesPercentage,
+                votes: candidateVotes,
+                totalVoters: totalYesVoters,
+                percentage: approvalPercentage,
                 status: resultStatus,
                 rank: 1,
+                isUnopposed: true,
               },
             ];
+
+            const winnerCandidate = totalYesVoters > candidateVotes ? results[0] : null;
 
             return {
               name,
               results,
-              totalVotesUnopposed,
-              winner: results[0],
+              totalVotes: candidateVotes,
+              winner: winnerCandidate,
             };
           } else {
             // Use candidate.votes directly for multiple candidates
@@ -237,8 +247,8 @@ const VoteResults = () => {
       pdf.setFontSize(12);
       pdf.text("Rank", 10, yPosition);
       pdf.text("Candidate", 30, yPosition);
-      pdf.text("Votes", 110, yPosition);
-      pdf.text("Percentage", 140, yPosition);
+      pdf.text("Votes", 140, yPosition);
+      pdf.text("Percentage", 160, yPosition);
       yPosition += 10;
       pdf.line(10, yPosition, 200, yPosition); // Line under headers
       yPosition += 5;
@@ -247,8 +257,8 @@ const VoteResults = () => {
       selectedPortfolio.results.forEach((result) => {
         pdf.text(`${result.rank}`, 10, yPosition);
         pdf.text(`${result.candidate}`, 30, yPosition);
-        pdf.text(`${result.votes}`, 110, yPosition);
-        pdf.text(`${result.percentage}%`, 140, yPosition);
+        pdf.text(`${result.votes}`, 140, yPosition);
+        pdf.text(`${result.percentage}%`, 160, yPosition);
         yPosition += 10;
       });
 

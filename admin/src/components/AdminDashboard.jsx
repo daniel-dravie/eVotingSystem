@@ -106,7 +106,7 @@ const AdminDashboard = () => {
       const votedCount = voters.filter(
         (doc) => doc.data().isVoted === "yes" || doc.data().isVoted === true
       ).length;
-      const voterTurnout = totalVoters > 0 ? ((votedCount / totalVoters) * 100).toFixed(2) : 0;
+      const voterTurnout = totalVoters > 0 ? ((votedCount / totalVoters) * 100).toFixed(3) : 0;
 
       setStats(prev => ({
         ...prev,
@@ -180,11 +180,8 @@ const AdminDashboard = () => {
           <Toolbar>
             <Logo7DCreationz />
 
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Admin Dashboard
-            </Typography>
 
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" sx={{ flexGrow: 1, paddingLeft: 50 }}>
               E-Voting System Platform
             </Typography>
             <Typography variant="body1" sx={{ marginRight: 2 }}>
